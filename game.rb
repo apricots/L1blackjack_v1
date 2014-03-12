@@ -10,6 +10,7 @@ deck4 = [2,3,4,5,5,6,7,4,4,5,5,5]
 welcome
 deck = shuffle_deck
 print "The Shuffled Deck:"
+puts
 print deck
 puts
 deal_to_player(deck)

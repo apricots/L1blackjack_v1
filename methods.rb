@@ -27,6 +27,7 @@ def shuffle_deck
   count = 52
   # while there are still some cards remaining in the deck...
   while count > 0
+    # randomize position from old to new deck
     index = rand(count)
     $shuffled_deck.push(original_deck[index])
     original_deck.delete_at(index)
@@ -46,10 +47,10 @@ def deal_to_player(deck)
   $player_cards = []
   $player_cards.push(card_1)
   $player_cards.push(card_2)
-  say "Welcome, #{$name}! Your first card is '#{card_1}' and your second card is '#{card_2}'"
+  say "Welcome, #{$name}! Your first card is '#{card_1}' and your second card is '#{card_2}'."
   check_and_total
   if $win
-    say "YOU WIN!!!!"
+    say "Well, aren't you lucky? YOU WON!"
     abort
   end
 end
@@ -61,15 +62,15 @@ def check_and_total
     total2 = calculate_with_ace($player_cards)
     # if both values are not bust!
     if total1 <= 21 && total2 <= 21
-      say "You have a total of either #{total1} or #{total2}"
+      say "You have a total of either #{total1} or #{total2}."
       $final = total1
     else
-      say "You have a total of #{total2}"
+      say "You have a total of #{total2}."
       $final = total2
     end
   else
     total = calculate($player_cards)
-    say "You have a total of #{total}"
+    say "You have a total of #{total}."
     $final = total
   end
 
@@ -94,15 +95,15 @@ def dealer_check_and_total
     total2 = calculate_with_ace($dealer_cards)
     # if both values are not bust!
     if total1 <= 21 && total2 <= 21
-      say "The dealer has a total of either #{total1} or #{total2}"
+      say "The dealer has a total of either #{total1} or #{total2}."
       $final_dealer = total1
     else
-      say "The dealer has a total of #{total2}"
+      say "The dealer has a total of #{total2}."
       $final_dealer = total2
     end
   else
     total = calculate($dealer_cards)
-    say "The dealer has a total of #{total}"
+    say "The dealer has a total of #{total}."
     $final_dealer = total
   end
 
@@ -133,10 +134,6 @@ end
 def welcome
   say "Hi there! What is your name?"
   $name = gets.chomp
-end
-
-def player_turn
-  say "Would you like to hit or stay?"
 end
 
 # method to calculate the sum of the cards.. with ACE = 11
@@ -178,14 +175,14 @@ def check_a(array)
   end
 end
 
-# player can HIT until they bust or STAY on their turn
+# player can HIT until they bust, or STAY on their turn
 def player_turn
   say "It's your turn. Would you like to HIT or STAY?"
   response = gets.chomp
   # if user wants to HIT
   if response.upcase == "HIT"
     puts
-    say "Okay, you said HIT right? Hand before hit:"
+    say "Okay #{$name}, you said HIT right? Hand before hit:"
     print $player_cards
     puts
     #check_a($player_cards)
@@ -193,19 +190,19 @@ def player_turn
     next_card = $shuffled_deck[$card_number]
     $player_cards.push(next_card)    
     #update which card number user is on
-    $card_number = $card_number + 1
-
+    update_card
     say "These are your new cards!"
     print $player_cards
-    say "#{$name}, your next card was a #{next_card}."
+    puts
+    say "#{$name}, your next card was a '#{next_card}'."
     # check if there are Aces, and total up cards
     check_and_total
     # check if busted
     if $bust
-      say "GAME OVER! You busted!"
+      say "BUSTED! You got greedy, didn't you? ;)"
       abort
     elsif $win
-      say "YOU WIN!!!"
+      say "Congratulations.. YOU WIN!!!"
       abort
     else
       player_turn
@@ -215,15 +212,17 @@ def player_turn
   # if user wants to STAY!
   elsif response.upcase == "STAY"
     puts
-    say "Okay. You would like to STAY with #{$final}."
+    say "Okay, #{$name}. You would like to STAY with #{$final}."
     say "It is the Dealer's Turn now!"
-  # else
-  #   puts
-  #   say "I don't understand. Can you please repeat that?"
-  #   player_turn
+  # be annoying
+  else
+    puts
+    say "I don't understand. Can you please repeat that?"
+    player_turn
   end
 end
 
+# update variable to keep track of where in shuffled deck you are
 def update_card
   $card_number = $card_number + 1
 end
@@ -242,14 +241,7 @@ def dealer_begin
   say "Dealer's cards are '#{card_1}' and '#{card_2}'"
   dealer_check_and_total
   # check if the dealer has busted
-  if $bust
-    say "The dealer has BUSTED! You win :)"
-  # check if dealer has won (reached 21 on first round)
-  elsif $lose
-    say "Sorry, you lost :("
-  else
-    dealer_turn
-  end
+  end_game
 end
 
 # dealer gets next card
@@ -261,51 +253,39 @@ def dealer_hit
   say "Dealer received a #{next_card}!"
 end
 
+#check if the game has ended
+def end_game
+  # check if the dealer has busted
+  if $bust
+    say "The dealer has BUSTED! You win :)"
+  # check if dealer has won
+  elsif $lose
+    say "Sorry, you lost :( Better luck next time."
+  # if game isn't ended, then recall dealer automation
+  else
+    dealer_turn
+  end
+end
+
 # if dealer has under 17 points, they must keep hitting
 def dealer_turn
-  print "This is what the dealer has currently:"
-  puts $final_dealer
-
-
+  print $dealer_cards
+  puts
+  # if dealer has not reached 17 points, have to continue HITting
   while $final_dealer < @dealer_limit do
     dealer_hit
     print $dealer_cards
     puts
     dealer_check_and_total
   end
-
+  # if dealer reached 17, but still has less points than player,
+  # continue to hit, as well
   while $final_dealer <= $final && $final_dealer >= @dealer_limit do
     dealer_hit
     print $dealer_cards
     puts
     dealer_check_and_total
   end
-
-
-  if $bust
-    say "The dealer has BUSTED! You win :)"
-  # check if dealer has won (reached 21 on first round)
-  elsif $lose
-    say "Sorry, you lost :("
-  else
-    dealer_turn
-  end
-
+  #check if game ended
+  end_game
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
